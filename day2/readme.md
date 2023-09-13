@@ -239,7 +239,7 @@ by converting 3 bits at a time to one octal digit:
 leading `0`:
 
 ```c
-// code/octal.c
+// snippets/octal.c
 
 #include <stdio.h> /* printf */
 
@@ -258,7 +258,7 @@ hexadecimal digit.  For example `1101 1101 0011 -> 13 13 3 -> dd3`.  In C,
 you can represent hexadecimal numbers with a leading `0x`
 
 ```c
-// code/hexadecimal.c
+// snippets/hexadecimal.c
 
 #include <stdio.h> /* printf */
 
