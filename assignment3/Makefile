@@ -1,4 +1,4 @@
-test: uparrow collatz complex median pythagorean
+test: uparrow collatz mypow median pythagorean
 
 uparrow:
 	gcc uparrow.c -o uparrow.out
@@ -8,9 +8,9 @@ collatz:
 	gcc collatz.c -o collatz.out
 	./collatz.out
 
-complex:
-	gcc complex.c -o complex.out
-	./complex.out
+mypow:
+	gcc mypow.c -o mypow.out
+	./mypow.out
 
 median:
 	gcc median.c -o median.out
@@ -23,4 +23,4 @@ pythagorean:
 clean:
 	rm *.out
 
-.PHONY: uparrow collatz complex median pythagorean test
+.PHONY: uparrow collatz mypow median pythagorean test
