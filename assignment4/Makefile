@@ -1,4 +1,4 @@
-test: transform lower strip palindrome conway
+test: transform lower strip palindrome
 
 transform:
 	gcc -lm transform.c -o transform.out
