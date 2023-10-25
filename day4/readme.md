@@ -1133,8 +1133,6 @@ HiI'mRoss!!
 --Done reading!--
 ```
 
-TODO HERE ROSS
-
 ## Getting Formatted Input
 
 So far we have the tools to read the user input character by character, but
