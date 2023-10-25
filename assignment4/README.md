@@ -13,9 +13,4 @@ To run your code, I am going to run the `make` command which follows the
 instructions in `Makefile`.  You can do the same to make sure it looks okay
 before sending it to me.
 
-## Note on Difficulty
-
-This is probably one of the hardest assignments of the class.  The `conway`
-problem may be too difficult.  We will see how it goes, but I may turn it
-into extra credit rather than required if it turns out too hard.
-
+Please note: conway is not in the `test` make target.  This is because it is extra credit!
