@@ -48,8 +48,8 @@ sentence = '{greeting}, my name is {name}'
 # Alter the dictionary to make your last name all caps
 
 # Here is a nested structure
-d = {'hello': [[{'cory': 'nezin'}, {'CORY': ['N', 'E', 'Z', 'I', 'N']}]]}
-# Change the 'Z' from the list ['N', 'E', 'Z', 'I', 'N'] inside to a 'z'
+d = {'hello': [[{'ross': 'kaplan'}, {'ROSS': ['K', 'A', 'P', 'L', 'A', 'N']}]]}
+# Change the 'P' from the list ['K', 'A', 'P', 'L', 'A', 'N'] inside to a 'p'
 
 # Use a for loop to print numbers 1 through 10 (inclusive)
 
