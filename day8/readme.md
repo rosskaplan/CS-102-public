@@ -875,5 +875,1064 @@ def visualize():
         print();
 
 visualize()
+```
+
+## Advanced Functions
+
+All of that covered the basic control flow we had in C, but
+there is even more available in Python.  In particular,
+we can do a lot more with functions.
+
+### Functions as Arguments
+
+Similar to C, we can pass functions as arguments to other functions, but the
+syntax is a lot simpler in Python.  Watch this:
+
+```py
+# snippets/functional_1.py
+
+def add_one(x):
+    return x + 1
+
+def apply_function(f, lst):
+    length = len(lst)
+    for n in range(length):
+        lst[n] = f(lst[n])
+
+lst = [1, 2, 3]
+print(lst)
+apply_function(add_one, lst)
+print(lst)
+
+```
+
+### Lambdas
+
+In case we don't have a function readily defined, we can use **lambda** to 
+define one on the spot.
+
+```py
+# snippets/lambda_1.py
+
+def apply_function(f, lst):
+    length = len(lst)
+    for n in range(length):
+        lst[n] = f(lst[n])
+
+lst = [1, 2, 3]
+print(lst)
+apply_function(lambda x: x + 1, lst)
+print(lst)
+
+```
+
+There is basically no difference in doing this compared to defining a function
+beforehand, it's just convenient.
+
+```py
+# snippets/lambda_2.py
+
+import pprint
+lst = [
+    {'name': 'zachary', 'grade': 70},
+    {'name': 'cory', 'grade': 80},
+    {'name': 'deborah', 'grade': 100},
+    {'name': 'ross', 'grade': 90},
+    {'name': 'gordon', 'grade': 85},
+]
+print('Unsorted')
+pprint.pprint(lst)
+lst.sort(key=lambda record: record['grade'])
+print('Sorted by grade')
+pprint.pprint(lst)
+lst.sort(key=lambda record: record['name'])
+print('Sorted by name')
+pprint.pprint(lst)
+print('Highest Grade')
+pprint.pprint(max(lst, key=lambda record: record['grade']))
+print('First Name (Alphabetically)')
+pprint.pprint(min(lst, key=lambda record: record['name']))
+
+```
+
+You will often see this in the context of some built in functions:
+
+```py
+# snippets/lambda_3.py
+
+import pprint
+lst = [
+    {'name': 'cory', 'grade': 80},
+    {'name': 'deborah', 'grade': 100},
+    {'name': 'ross', 'grade': 90},
+    {'name': 'gordon', 'grade': 85},
+]
+print('Unsorted')
+pprint.pprint(lst)
+lst.sort(key=lambda record: record['grade'])
+print('Sorted by grade')
+pprint.pprint(lst)
+lst.sort(key=lambda record: record['name'])
+print('Sorted by name')
+pprint.pprint(lst)
+
+```
+
+### Functions as Return Values
+
+We can also create or modify functions and then use or return them.
+For example, we can create a function that takes in any other function
+as a parameter and then returns a function which does the same thing,
+and also prints the time it took to run.
+
+```py
+# snippets/functional_2.py
+
+import time
+
+def timed(f):
+    def wrapper(*args, **kwargs):
+        t1 = time.time()
+        retval = f(*args, **kwargs)
+        t2 = time.time()
+        print(f'Calling "{f.__name__}" took {t2-t1} seconds')
+        return retval
+    return wrapper
+
+def wait(seconds):
+    print('waiting')
+    time.sleep(seconds)
+    print('done waiting!')
+
+timed_wait = timed(wait)
+
+timed_wait(0.1)
+timed_wait(0.2)
+timed_wait(0.3)
+
+```
+
+This is fairly common for some Python programs, so there is even a
+special syntax for doing it:
+
+```py
+# snippets/functional_3.py
+
+import time
+
+def timed(f):
+    def wrapper(*args, **kwargs):
+        t1 = time.time()
+        retval = f(*args, **kwargs)
+        t2 = time.time()
+        print(f'Calling "{f.__name__}" took {t2-t1} seconds')
+        return retval
+    return wrapper
+
+@timed
+def wait(seconds):
+    print('waiting')
+    time.sleep(seconds)
+    print('done waiting!')
+
+timed_wait(0.1)
+timed_wait(0.2)
+timed_wait(0.3)
+
+```
+
+The `@` basically says to do something like `wait = timed(wait)` just after the
+definition.  A function like this, which takes a function and returns a
+function is called a **decorator**.
+
+### Generators
+
+In Python, there is a special type of object called a **generator function**.  A
+generator function is like a function, except that it maintains state between
+calls.  It can maintain data like variables, and even what line of code it
+exited from.  It will return to that line of code when you call it again.
+
+Here is a simple generator which counts to 3.
+
+```py
+# snippets/generator.py
+
+def count_to_3():
+    yield 1
+    yield 2
+    yield 3
+
+generator = count_to_3()
+print(next(generator))
+print(next(generator))
+print(next(generator))
+
+```
+
+Instead of `return`, you give a value back with `yield`.  You can see that
+every time you call `next` on a generator it advances to the next `yield`
+statement.  If you go too far, you will get an error.
+
+```py
+# snippets/generator_wrong.py
+
+def count_to_3():
+    yield 1
+    yield 2
+    yield 3
+
+generator = count_to_3()
+print(next(generator))
+print(next(generator))
+print(next(generator))
+print(next(generator))
+
+```
+
+You can convert any generator into a plain old list by using `list`.
+
+```py
+# snippets/generator_list.py
+
+def count_to_3():
+    yield 1
+    yield 2
+    yield 3
+
+generator = count_to_3()
+print(list(generator))
+
+```
+
+You can do basically anything you can do with a normal function, and even
+create multiple instances of a generator at once:
+
+```py
+# snippets/generator_wee.py
+
+def count_to_n(n):
+    for i in range(n):
+        yield i
+
+generator_10 = count_to_n(10)
+generator_100 = count_to_n(100)
+print(list(generator_10))
+print(list(generator_100))
+print(list(generator_10))
+
+```
+
+Just be careful!  Generators come with a huge warning.  Once you've used a value,
+that's it.  You cannot get it back again it is forever gone.  That is why when
+we print `list(generator_10)` a second time, it is empty.
+
+## Input and (File) Output
+
+You can get command line arguments and inputs by using `sys.argv`.
+Here is a simple program that echos the user input back to them
+separated by newlines.
+
+### Command Line Input
+
+```py
+# snippets/input_1.py
+
+import sys
+
+for arg in sys.argv:
+    print(arg)
+
+```
+
+You can get interactive user input with the `input` function.
+
+```py
+# snippets/input_2.py
+
+name = input('Enter your name: ')
+print(f'Hello, {name}')
+
+```
+
+### File Input
+
+You can read files by using the `open` keyword.
+
+```py
+# snippets/input_3.py
+
+opened_file = open('README.md')
+
+content = opened_file.read()
+
+print(f'Number of characters: {len(content)}')
+words = content.split()
+print(f'Number of words: {len(words)}')
+lines = content.split('\n')
+print(f'Number of lines: {len(lines)}')
+print(f'Number of unique words: {len(set(words))}')
+
+opened_file.close()
+
+```
+
+It is generally good practice to close a file after you are done
+using it.  This is so other programs can get access to it.  It
+is a common mistake to forget to close it, so in Python you can
+using something called a **context manager** which will close it
+for you.
+
+```py
+# snippets/input_4.py
+
+with open('README.md') as opened_file:
+    content = opened_file.read()
+    print(f'Number of characters: {len(content)}')
+    words = content.split()
+    print(f'Number of words: {len(words)}')
+    lines = content.split('\n')
+    print(f'Number of lines: {len(lines)}')
+    print(f'Number of unique words: {len(set(words))}')
+
+```
+
+### File Output
+
+You can write to files in a similar way as you read from them.
+
+```py
+# snippets/output_1.py
+
+with open('output.txt', 'w') as opened_file:
+    opened_file.write('Hello, ')
+    opened_file.write('world')
+    opened_file.write('!')
+
+with open('output.txt') as opened_file:
+    print(opened_file.read())
+
+```
+
+## Classes
+
+### Basic Example
+
+Classes in Python are similar to classes in C++, just with some different
+syntax and more freedom.  You can define a new class by using the `class`
+keyword, and create a new instance (object) by "calling" it with parentheses.
+Here is a simple example.
+
+```py
+# snippets/class_1.py
+
+class Foo():
+    pass
+
+foo = Foo()
+
+print(foo)
+
+```
+
+### Methods
+
+Methods of classes can defined the same way functions can.  Just make sure
+they are indented and within in your class definition.  One major difference
+between Python and C++ (and more languages) is that in Python, the reference
+to the object (the `this` keyword in C++) is implicitly provided as an input
+to every method.  Here is an example demonstrating this
+
+```py
+# snippets/method.py
+
+class Foo():
+    def print_hi(self):
+        print('hi')
+
+foo = Foo()
+foo.print_hi()
+
+```
+
+The name `self` is not special, you could technically put anything there, but
+the name `self` is the convention and there is no reason to stray from it.
+You must explicitly type `self` as the first input of every method (with few
+exceptions we will talk about later)
+
+Here is an example of a common mistake.  Forgetting to write `self` as the first
+argument leads to an error because the method is implicitly called with `foo` as
+the first argument but as defined the method takes zero arguments.
+
+```py
+# snippets/method_wrong.py
+
+class Foo():
+    def print_hi():
+        print('hi')
+
+foo = Foo()
+foo.print_hi()
+
+```
+
+### Constructor
+
+You can create a constructor for a class by implementing the special
+`__init__` method.  The double underscores preceding and following `init`
+can be pronounced **dunder**, so we can pronounce this as **dunder init**.
+This method is known as a **magic method** because it is typically not
+called explicitly.  Here is an example of a simple constructor.
+
+```py
+# snippets/constructor.py
+
+class Foo():
+
+    def __init__(self, x):
+        self.x = x
+
+    def print_x(self):
+        print(self.x)
+
+foo = Foo(5)
+foo.print_x()
+
+```
+
+Note that as with other methods, `self` is the first argument.  We can
+use `self` to add data to the object.  In this cases we added some 
+arbitrary `x` value, and then we can reference it later in `print_x`
+
+### Destructor
+
+You don't really have to write destructors in Python because memory is
+mostly handled for you.  However the option is there with the magic method
+`__del__` which we can see implemented here
+
+```py
+# snippets/destructor.py
+
+class Foo():
+
+    def __init__(self, x):
+        self.x = x
+
+    def print_x(self):
+        print(self.x)
+
+    def __del__(self):
+        print('I am being destroyed')
+
+foo = Foo(5)
+foo.print_x()
+print('getting rid of foo')
+foo = 1
+print('got rid of foo')
+
+```
+
+You can see that we never explicitly delete the object like in C++, we just
+set the variable name containing that object to another variable and Python is
+smart enough to destroy the object when it sees we may no longer reference it.
+
+### Static Methods
+
+If the method you are writing does not need a reference to the object calling it,
+but you want to logically group it with your class, you can use the `@staticmethod`
+decorator to avoid passing `self` like this:
+
+```py
+# snippets/staticmethod.py
+
+class Foo():
+    @staticmethod
+    def print_hi():
+        print('hi')
+
+foo = Foo()
+foo.print_hi()
+Foo.print_hi()
+
+```
+
+In this case, you should consider whether it makes sense to just move the
+function out of the class, since it has the same effect.
+
+### Class Methods
+
+If you want to write a method which creates an instance of your class with
+some special logic, you can use a `@classmethod`.  In a class method, the
+class of the object will be implicitly given as the first paremeter, rather
+than the object itself.  This can useful for creating classes from some
+other common objects with some additional logic.  Here is an example.
+
+```py
+# snippets/classmethod.py
+
+class Foo():
+    def __init__(self, one, two, three):
+        self.one = one
+        self.two = two
+        self.three = three
+
+    def print_all(self):
+        print(self.one, self.two, self.three)
+
+    @classmethod
+    def make_foo_from_list(cls, lst):
+        return cls(lst[0], lst[1], lst[2])
+
+foo = Foo.make_foo_from_list(['a', 'b', 'c'])
+foo.print_all()
+
+```
+
+### Abstract Methods
+
+Python has **abstract base classes** and **virtual functions**, almost the same
+as in C++ but under some new syntax and naming.  Here is an example that
+implements an abstract base class with one virtual function (now called an
+abstract method)
+
+```py
+# snippets/abstractmethod.py
+
+import abc # abstract base class
+
+class Foo(abc.ABC):
+    @abc.abstractmethod
+    def print_me():
+        pass
+
+foo = Foo()
+
+```
+
+You can see if we try to create an instance of an abstract base class that
+has an abstract method, we get an error, as we did in C++.  We can fix this
+by creating a new class and **inheriting** from the base class, implementing
+the method.
+
+```py
+# snippets/abstractmethod_correct.py
+
+import abc # abstract base class
+
+class Foo(abc.ABC):
+    @abc.abstractmethod
+    def print_me(self):
+        pass
+
+class XBar(Foo):
+    def __init__(self, x):
+        self.x = x
+
+    def print_me(self):
+        print(self.x.lower())
+
+class YBar(Foo):
+    def __init__(self, y):
+        self.y = y
+
+    def print_me(self):
+        print(self.y.upper())
+
+xbar = XBar('xyz')
+ybar = YBar('xyz')
+xbar.print_me()
+ybar.print_me()
+
+```
+
+### Inheritance
+
+Inheritance works pretty much the same as in C++, let's take a look at an example.
+
+```py
+# snippets/inheritance.py
+
+import abc # abstract base class
+
+class Foo():
+    def print_hi(self):
+        print('hi')
+    def print_bye(self):
+        print('bye')
+
+class Bar(Foo):
+    def print_hi(self):
+        print('hello there')
+
+foo = Foo()
+foo.print_hi()
+foo.print_bye()
+bar = Bar()
+bar.print_hi()
+bar.print_bye()
+
+```
+
+You can use the `super` keyword to call a parent method, when implementing a new
+version of that method.  For example, let's say we wanted to extend a class's
+constructor to take an additional parameter but otherwise do the same stuff.
+
+### Other Magic Methods
+
+There are a ton of other magic methods that Python lets you override in your
+classes.  Here we will go over an example with a couple, but there are a lot
+more.
+
+
+```py
+# snippets/dunder.py
+
+class Interval():
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def __repr__(self):
+        return f'{self.start} -> {self.end}'
+
+    def __str__(self):
+        return f'{self.start} -> {self.end}'
+
+    def __contains__(self, element):
+        return bool(self.start < element < self.end)
+
+    def __iter__(self):
+        return iter(range(self.start, self.end + 1))
+
+    def __mul__(self, other):
+        return Interval(max(self.start, other.start), min(self.end, other.end))
+
+    def __nonzero__(self):
+        return bool(len(self))
+
+    def __len__(self):
+        return self.end - self.start
+
+foo = Interval(5, 9)
+bar = Interval(7, 11)
+empty = Interval(7, 7)
+print(foo)
+print(6 in foo)
+print(list(foo))
+print(foo * bar)
+print(len(empty))
+print(bool(empty))
+
+```
+
+## Modules
+
+### Importing
+
+There are several ways to import code from another file.
+
+1. `import x`
+
+```py
+# snippets/simple_import.py
+
+import pprint
+
+lst = [[(y, x) for x in range(5)] for y in range(5)]
+print(lst)
+pprint.pprint(lst)
+
+```
+
+In this case you will always be importing a module object, which you can then
+use by accessing its members
+
+2. `import x as y`
+
+```py
+# snippets/alias_import.py
+
+import pprint as pp
+
+lst = [[(y, x) for x in range(5)] for y in range(5)]
+print(lst)
+pp.pprint(lst)
+
+
+```
+
+This is the same, except you can give it a new name.  This can be helpful if
+two custom modules happen to have the same name, or you want a shorter name.
+
+3. `from x import y`
+
+```py
+# snippets/from_import.py
+
+from pprint import pprint
+
+lst = [[(y, x) for x in range(5)] for y in range(5)]
+print(lst)
+pprint(lst)
+
+```
+
+This imports a specific thing (could be a variable, object, function, class,
+whatever) from the given module.
+
+4. `from x import y as z`
+
+```py
+# snippets/from_alias_import.py
+
+from pprint import pprint as pp
+
+lst = [[(y, x) for x in range(5)] for y in range(5)]
+print(lst)
+pp(lst)
+
+
+```
+
+This does the same but gives it a new name.
+
+### Modules
+
+Look here for a full list of built in Python modules:
+`https://docs.python.org/3/py-modindex.html`
+
+Most modules are useuless to you, so we will go over some common and useful
+ones.
+
+#### `copy`
+
+```py
+# snippets/my_copy.py
+
+import copy
+
+def append_one_in_place(lst):
+    lst.append(1)
+    return lst
+
+def append_one_to_copy(lst):
+    lst = copy.copy(lst)
+    lst.append(1)
+    return lst
+
+def append_one_to_first_elem(lst):
+    lst[0].append(1)
+    return lst
+
+a = [3, 2]
+b = append_one_in_place(a)
+print(a)
+print(b)
+
+a = [3, 2]
+b = append_one_to_copy(a)
+print(a)
+print(b)
+
+a = [[0]]
+b = append_one_to_first_elem(a)
+print(a)
+print(b)
+
+```
+
+#### `math`
+
+```py
+# snippets/my_math.py
+
+import math
+
+print(math.ceil(0.3))
+print(math.comb(10, 3))
+print(math.factorial(100))
+print(math.gcd(7*11, 3*7))
+print(math.sqrt(2))
+print(math.prod(range(1,101)))
+print(math.log(math.exp(2)))
+
+```
+
+#### `random`
+
+```py
+# snippets/my_random.py
+
+import random
+
+between_1_and_10 = random.randint(1, 10)
+print(between_1_and_10)
+between_0_and_1 = random.uniform(0, 1)
+print(between_0_and_1)
+a_b_or_c = random.choice(['a', 'b', 'c'])
+print(a_b_or_c)
+
+```
+
+#### `collections`
+
+```py
+# snippets/my_collections.py
+
+import collections
+import string
+import random
+
+rs = ''.join(random.choices(string.ascii_lowercase, k=1000))
+# Create a count of each unique element
+count = collections.Counter(rs)
+print(count.most_common())
+# You can access it like a dictionary
+print(count['z'])
+
+dd = collections.defaultdict(list)
+dd['new_key'].append(1)
+dd['new_key'].append(2)
+dd['new_key_2'].append(0)
+print(dict(dd))
+
+```
+
+#### `enum`
+
+```py
+# snippets/my_enum.py
+
+import enum
+
+class Mode(enum.Enum):
+    READ = 1
+    WRITE = 2
+    EXECUTE = 3
+
+r = Mode.READ
+w = Mode.WRITE
+e = Mode.EXECUTE
+
+print(r, w, e)
+
+```
+
+#### `functools`
+
+```py
+# snippets/my_functools.py
+
+import functools
+
+def add(a, b):
+    return a + b
+
+add_one = functools.partial(add, b=1)
+print(add_one(4))
+
+
+@functools.lru_cache(maxsize=128)
+def fib_cached(n):
+    if n in (0, 1):
+        return 1
+    else:
+        return fib_cached(n-1) + fib_cached(n-2)
+
+def fib(n):
+    if n in (0, 1):
+        return 1
+    else:
+        return fib(n-1) + fib(n-2)
+
+print('running fib cached')
+print(fib_cached(100))
+print('running fib')
+print(fib(34))
+
+```
+
+#### `heapq`
+
+```py
+# snippets/my_heapq.py
+
+import heapq
+
+h = []
+heapq.heappush(h, 2)
+heapq.heappush(h, 1)
+heapq.heappush(h, 3)
+heapq.heappush(h, -1)
+
+print(heapq.heappop(h))
+print(heapq.heappop(h))
+print(heapq.heappop(h))
+print(heapq.heappop(h))
+
+
+```
+
+#### `itertools`
+
+```py
+# snippets/my_itertools.py
+
+import pprint
+import itertools
+
+pprint.pprint(list(itertools.product([0, 1, 2], [0, 1, 2])))
+pprint.pprint(list(itertools.product([0, 1, 2], repeat=3)))
+pprint.pprint(list(itertools.product(['a', 'b', 'c'], [1, 2, 3])))
+
+pprint.pprint(list(itertools.permutations('aabc')))
+pprint.pprint(list(itertools.combinations('aabc', 3)))
+
+```
+
+#### `json`
+
+```py
+# snippets/my_json.py
+
+import json
+
+lst = [
+    {'name': 'cory', 'grade': 80},
+    {'name': 'deborah', 'grade': 100},
+    {'name': 'ross', 'grade': 90},
+    {'name': 'gordon', 'grade': 85},
+]
+
+stringified = json.dumps(lst)
+
+print(lst)
+print(stringified)
+print(lst[0])
+print(stringified[0])
+
+objectified = json.loads(stringified)
+
+assert objectified == lst
+
+```
+
+#### `logging`
+
+```py
+# snippets/my_logging.py
+
+import logging
+
+# This is the only way you should ever ever ever make a logger
+logger = logging.getLogger(__name__)
+
+# Will not print anything
+logger.info('Here is a an info log')
+logger.warning('Here is a warning log')
+
+log_format = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=log_format, level=logging.INFO)
+
+# Will print something
+logger.info('Here is a an info log')
+
+```
+
+#### `os`
+
+```py
+# snippets/my_os.py
+
+import os
+
+files = os.listdir('.')
+
+print(files)
+print(os.getenv('HOME'))
+
+```
+
+#### `re`
+
+```py
+# snippets/my_re.py
+
+import re
+
+pattern = ' [0-9].[0-9][0-9] '
+string = '$123.0 1.23 12.23'
+matches = list(re.finditer(pattern, string))
+print(matches)
+
+pattern = '[0-9]'
+string = '$123.0 1.23 12.23'
+new_string = re.sub(pattern, '#', string)
+print(new_string)
+
+pattern = '^[a-zA-Z]+ [a-zA-Z]+$'
+print(re.match(pattern, 'Cory Charles Nezin'))
+print(re.match(pattern, 'Cory Nezin'))
+
+```
+
+### Packages
+
+#### PIP
+
+You can install other people's code by using `pip`
+
+#### NumPy
+
+```
+python -m pip install numpy
+```
+
+```py
+# snippets/my_numpy.py
+
+import numpy as np
+
+A = np.arange(12).reshape(4,3)
+B = np.arange(12).reshape(3,4)
+
+prod = A.dot(B)
+
+print(prod)
+
+```
+
+#### Matplotlib
+
+```
+python -m pip install matplotlib
+```
+
+```py
+# snippets/my_matplotlib.py
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Time from 0s to 5s in 0.2s intervals
+t = np.arange(0.0, 5.0, 0.2)
+plt.plot(t, t, 'r--', t, t**2, 'b--', t, t**3, 'g--')
+plt.show()
+
+```
+
+#### Requests
+
+```
+python -m pip install requests
+```
+
+```py
+# snippets/my_requests.py
+
+import requests
+
+resp = requests.get('http://google.com')
+
+print(resp.content)
 
 ```
